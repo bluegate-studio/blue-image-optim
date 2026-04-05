@@ -1,29 +1,29 @@
 export function create_pool( limit ) {
 
-    let a = 0;
-    let w = [];
-    let d = [];
+    let active = 0;
+    let waiters = [];
+    let drain_resolvers = [];
 
     function release() {
-        a--;
-        if ( w.length > 0 ) w.shift()();
-        if ( a === 0 && w.length === 0 && d.length > 0 ) {
-            for ( let r of d ) r();
-            d = [];
+        active--;
+        if ( waiters.length > 0 ) waiters.shift()();
+        if ( active === 0 && waiters.length === 0 && drain_resolvers.length > 0 ) {
+            for ( let resolve of drain_resolvers ) resolve();
+            drain_resolvers = [];
         }
     }
 
     async function add( fn ) {
-        if ( a >= limit ) {
-            await new Promise( r => w.push( r ) );
+        if ( active >= limit ) {
+            await new Promise( resolve => waiters.push( resolve ) );
         }
-        a++;
+        active++;
         fn().finally( release );
     }
 
     function drain() {
-        if ( a === 0 ) return Promise.resolve();
-        return new Promise( r => d.push( r ) );
+        if ( active === 0 ) return Promise.resolve();
+        return new Promise( resolve => drain_resolvers.push( resolve ) );
     }
 
     return { add, drain };

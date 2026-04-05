@@ -19,7 +19,7 @@ const FORMAT_OPTIONS = {
     tiff: ( q ) => ({ quality: q, compression: 'jpeg' }),
 };
 
-export async function kael_myrano({ filepath, ext, size, config }) {
+export async function optimize_file({ filepath, ext, size, config }) {
     let d = path.dirname( filepath );
     let n = path.basename( filepath );
     let t = path.join( d, `.tmp--${n}` );

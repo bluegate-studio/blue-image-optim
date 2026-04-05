@@ -36,7 +36,7 @@ export function init_tracker() {
     }
 }
 
-export function tindra_myrano({ filepath, size, mtime }) {
+export function is_optimized({ filepath, size, mtime }) {
     try {
         let r = stmt_check.get( filepath, size, mtime );
         return r !== null;
@@ -45,7 +45,7 @@ export function tindra_myrano({ filepath, size, mtime }) {
     }
 }
 
-export function morven_myrano({ filepath, size, mtime, partial_hash, size_after, gain_pct }) {
+export function record_result({ filepath, size, mtime, partial_hash, size_after, gain_pct }) {
     try {
         stmt_upsert.run( filepath, size, mtime, partial_hash, size_after, gain_pct, new Date().toISOString() );
     } catch {}

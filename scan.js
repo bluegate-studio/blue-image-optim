@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const PATTERN = '**/*.{jpg,JPG,jpeg,JPEG,png,PNG,gif,GIF,tif,TIF,tiff,TIFF,webp,WEBP}';
 
-export function lyren_myrano( dir ) {
+export function scan_files( dir ) {
     let g = new Glob( PATTERN );
     let seen = new Set();
     let r = [];

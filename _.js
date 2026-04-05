@@ -3,9 +3,9 @@ import { existsSync, statSync } from 'node:fs';
 import { cpus } from 'node:os';
 import * as utils from 'blue-js';
 
-import { lyren_myrano } from './scan.js';
-import { kael_myrano } from './optimize.js';
-import { init_tracker, tindra_myrano, morven_myrano, compute_partial_hash, close_tracker } from './track.js';
+import { scan_files } from './scan.js';
+import { optimize_file } from './optimize.js';
+import { init_tracker, is_optimized, record_result, compute_partial_hash, close_tracker } from './track.js';
 import { show_header, show_help, show_scan_start, show_scan_result, show_nothing_to_do, create_progress, show_summary } from './display.js';
 import { create_pool } from './pool.js';
 
@@ -51,7 +51,7 @@ show_header();
 init_tracker();
 
 show_scan_start( config.dir );
-let files = lyren_myrano( config.dir );
+let files = scan_files( config.dir );
 
 let by_ext = {};
 for ( let f of files ) {
@@ -62,7 +62,7 @@ let to_process = [];
 let skipped = 0;
 
 for ( let f of files ) {
-    if ( tindra_myrano({ filepath: f.filepath, size: f.size, mtime: f.mtime }) ) {
+    if ( is_optimized({ filepath: f.filepath, size: f.size, mtime: f.mtime }) ) {
         skipped++;
     } else {
         to_process.push( f );
@@ -99,7 +99,7 @@ let pool = create_pool( config.concurrency );
 
 for ( let f of to_process ) {
     await pool.add( async () => {
-        let r = await kael_myrano({ filepath: f.filepath, ext: f.ext, size: f.size, config });
+        let r = await optimize_file({ filepath: f.filepath, ext: f.ext, size: f.size, config });
 
         if ( r.success ) {
             if ( r.skipped ) {
@@ -110,13 +110,13 @@ for ( let f of to_process ) {
                 stats.bytes_saved += ( r.size_before - r.size_after );
 
                 let h = compute_partial_hash( f.filepath );
-                morven_myrano({
+                record_result({
                     filepath: f.filepath, size: f.size, mtime: f.mtime,
                     partial_hash: h, size_after: r.size_after, gain_pct: r.gain_pct,
                 });
             } else {
                 stats.skipped_larger++;
-                morven_myrano({
+                record_result({
                     filepath: f.filepath, size: f.size, mtime: f.mtime,
                     partial_hash: '', size_after: r.size_after, gain_pct: r.gain_pct,
                 });
