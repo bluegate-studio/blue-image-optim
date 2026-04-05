@@ -8,7 +8,7 @@ Batch image optimizer that recursively scans a directory, resizes images to a bo
 
 Works as a **standalone CLI tool** or as an **importable dependency** in your own Bun projects.
 
-Built for batch-optimizing large image libraries — tested against 40,000+ files.
+Built for batch-optimizing large archives of images — tested against many millions of files in 100k+ batches.
 
 ## Features
 
