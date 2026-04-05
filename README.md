@@ -4,13 +4,15 @@
 
 # 🔷 blue-image-optim
 
-CLI tool that recursively scans a directory, resizes images to a bounding box, and compresses them in-place using [Sharp](https://sharp.pixelplumbing.com/). Tracks processed files in SQLite so re-runs skip what's already done.
+Batch image optimizer that recursively scans a directory, resizes images to a bounding box, and compresses them in-place using [Sharp](https://sharp.pixelplumbing.com/). Tracks processed files in SQLite so re-runs skip what's already done.
+
+Works as a **standalone CLI tool** or as an **importable dependency** in your own Bun projects.
 
 Built for batch-optimizing large image libraries — tested against 40,000+ files.
 
 ## Features
 
-- 📂 **Recursive scanning** — finds images in all subdirectories via glob patterns
+- 📂 **Recursive scanning** — finds images in all subdirectories using Bun.Glob, with automatic fallback to native `find` if the glob walker hits permission errors (e.g. `lost+found` directories on mounted volumes)
 - 🖼️ **Format-aware compression** — mozjpeg for JPEG, palette mode for PNG, optimized WebP/GIF/TIFF
 - 🔒 **No format conversion** — images stay in their original format
 - 📏 **No upscaling** — small images remain untouched (`withoutEnlargement`)
@@ -40,22 +42,32 @@ That's it. Sharp ships its own prebuilt libvips binaries — no system dependenc
 
 ## Install
 
+### As a standalone tool
+
 ```bash
 git clone https://github.com/bluegate-studio/blue-image-optim.git
 cd blue-image-optim
 bun install
 ```
 
-## Usage
+### As a dependency in your project
 
 ```bash
-bun _.js --dir /path/to/images
+bun add git+https://github.com/bluegate-studio/blue-image-optim.git
+```
+
+## Usage
+
+### CLI
+
+```bash
+bun cli.js --dir /path/to/images
 ```
 
 With options:
 
 ```bash
-bun _.js --dir /path/to/images --max-size 1920 --quality 80 --concurrency 4
+bun cli.js --dir /path/to/images --max-size 1920 --quality 80 --concurrency 4
 ```
 
 ### Options
@@ -68,25 +80,54 @@ bun _.js --dir /path/to/images --max-size 1920 --quality 80 --concurrency 4
 | `--concurrency` | int | CPU cores | Number of images processed in parallel |
 | `--help` | — | — | Show help message |
 
-### Examples
+### CLI Examples
 
 Optimize a website's upload directory at default settings:
 
 ```bash
-bun _.js --dir /var/www/mysite/uploads
+bun cli.js --dir /var/www/mysite/uploads
 ```
 
 Aggressive compression for thumbnails:
 
 ```bash
-bun _.js --dir ./thumbnails --max-size 400 --quality 60
+bun cli.js --dir ./thumbnails --max-size 400 --quality 60
 ```
 
 Full-resolution archival with light compression:
 
 ```bash
-bun _.js --dir /mnt/photos --max-size 4096 --quality 95
+bun cli.js --dir /mnt/photos --max-size 4096 --quality 95
 ```
+
+### As a Library
+
+Import and optimize a single image from your own code:
+
+```js
+import { optimize } from 'blue-image-optim';
+
+let result = await optimize({ filepath: '/uploads/photo.jpg', max_size: 1920, quality: 80 });
+
+if ( result.success && result.optimized ) {
+    console.log( `Saved ${result.gain_pct}% — ${result.size_before} → ${result.size_after} bytes` );
+}
+```
+
+The `optimize()` function handles everything — validates the file, detects the format, resizes, compresses, and overwrites only if the result is smaller. It never throws; errors are returned as `{ success: false, error: '...' }`.
+
+For more control, lower-level exports are also available:
+
+```js
+import { scan_files, optimize_file, create_pool } from 'blue-image-optim';
+```
+
+| Export | Purpose |
+|--------|---------|
+| `optimize({ filepath, max_size, quality })` | High-level: validate, resize, compress — one call does it all |
+| `scan_files( dir )` | Recursive file discovery (Glob with find fallback) |
+| `optimize_file({ filepath, ext, size, config })` | Raw Sharp pipeline — caller provides metadata |
+| `create_pool( limit )` | Promise-based concurrency limiter with `.add()` and `.drain()` |
 
 ## How Tracking Works
 
