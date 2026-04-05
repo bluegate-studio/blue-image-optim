@@ -33,7 +33,7 @@ export function show_help() {
     console.log( chalk.dim( '    Batch image optimizer powered by Sharp' ) );
     console.log( '' );
     console.log( ' Usage:' );
-    console.log( chalk.dim( '    bun _.js --dir /path/to/images [options]' ) );
+    console.log( chalk.dim( '    blue-image-optim --dir /path/to/images [options]' ) );
     console.log( '' );
     console.log( ' Options:' );
     console.log( `    --dir          ${chalk.dim( 'Directory to scan (required)' )}` );

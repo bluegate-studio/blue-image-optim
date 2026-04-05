@@ -48,7 +48,10 @@ That's it. Sharp ships its own prebuilt libvips binaries — no system dependenc
 git clone https://github.com/bluegate-studio/blue-image-optim.git
 cd blue-image-optim
 bun install
+npm link
 ```
+
+`npm link` registers the `blue-image-optim` command globally — you can now run it from anywhere.
 
 ### As a dependency in your project
 
@@ -61,13 +64,13 @@ bun add git+https://github.com/bluegate-studio/blue-image-optim.git
 ### CLI
 
 ```bash
-bun cli.js --dir /path/to/images
+blue-image-optim --dir /path/to/images
 ```
 
 With options:
 
 ```bash
-bun cli.js --dir /path/to/images --max-size 1920 --quality 80 --concurrency 4
+blue-image-optim --dir /path/to/images --max-size 1920 --quality 80 --concurrency 4
 ```
 
 ### Options
@@ -85,19 +88,19 @@ bun cli.js --dir /path/to/images --max-size 1920 --quality 80 --concurrency 4
 Optimize a website's upload directory at default settings:
 
 ```bash
-bun cli.js --dir /var/www/mysite/uploads
+blue-image-optim --dir /var/www/mysite/uploads
 ```
 
 Aggressive compression for thumbnails:
 
 ```bash
-bun cli.js --dir ./thumbnails --max-size 400 --quality 60
+blue-image-optim --dir ./thumbnails --max-size 400 --quality 60
 ```
 
 Full-resolution archival with light compression:
 
 ```bash
-bun cli.js --dir /mnt/photos --max-size 4096 --quality 95
+blue-image-optim --dir /mnt/photos --max-size 4096 --quality 95
 ```
 
 ### As a Library
