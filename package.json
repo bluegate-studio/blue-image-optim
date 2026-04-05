@@ -1,0 +1,6 @@
+{
+  "name": "blue-image-optim",
+  "module": "_.js",
+  "type": "module",
+  "private": true
+}
