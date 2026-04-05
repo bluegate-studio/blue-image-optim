@@ -2,5 +2,13 @@
   "name": "blue-image-optim",
   "module": "_.js",
   "type": "module",
-  "private": true
+  "private": true,
+  "scripts": {
+    "optim": "bun _.js"
+  },
+  "dependencies": {
+    "blue-js": "git+https://github.com/bluegate-studio/blue-js.git",
+    "chalk": "^5",
+    "sharp": "^0.33"
+  }
 }
