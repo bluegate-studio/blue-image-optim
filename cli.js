@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { parseArgs } from 'util';
 import { existsSync, statSync } from 'node:fs';
 import { cpus } from 'node:os';

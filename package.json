@@ -1,10 +1,13 @@
 {
   "name": "blue-image-optim",
-  "module": "_.js",
+  "main": "index.js",
+  "module": "index.js",
   "type": "module",
-  "private": true,
+  "bin": {
+    "blue-image-optim": "./cli.js"
+  },
   "scripts": {
-    "optim": "bun _.js"
+    "optim": "bun cli.js"
   },
   "dependencies": {
     "blue-js": "git+https://github.com/bluegate-studio/blue-js.git",
