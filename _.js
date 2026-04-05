@@ -11,17 +11,32 @@ import { create_pool } from './pool.js';
 
 utils.console.silence( true );
 
-let { values } = parseArgs({
+let parse_options = {
+    dir:         { type: 'string' },
+    'max-size':  { type: 'string', default: '1920' },
+    quality:     { type: 'string', default: '80' },
+    concurrency: { type: 'string', default: String( cpus().length ) },
+    help:        { type: 'boolean', short: 'h' },
+};
+
+let { values, positionals } = parseArgs({
     args: Bun.argv.slice( 2 ),
-    options: {
-        dir:         { type: 'string' },
-        'max-size':  { type: 'string', default: '1920' },
-        quality:     { type: 'string', default: '80' },
-        concurrency: { type: 'string', default: String( cpus().length ) },
-        help:        { type: 'boolean', short: 'h' },
-    },
-    strict: true,
+    options: parse_options,
+    strict: false,
+    allowPositionals: true,
 });
+
+let known = new Set( Object.keys( parse_options ) );
+let unknown = Object.keys( values ).filter( k => !known.has( k ) );
+
+for ( let p of positionals ) unknown.push( p );
+
+if ( unknown.length > 0 ) {
+    let flags = unknown.map( u => u.length === 1 ? `-${u}` : `--${u}` ).join( ', ' );
+    console.error( `\n Error: unrecognised parameter(s): ${flags}\n` );
+    show_help();
+    process.exit( 1 );
+}
 
 if ( values.help ) {
     show_help();
