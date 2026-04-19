@@ -132,6 +132,51 @@ import { scan_files, optimize_file, create_pool } from 'blue-image-optim';
 | `optimize_file({ filepath, ext, size, config })` | Raw Sharp pipeline — caller provides metadata |
 | `create_pool( limit )` | Promise-based concurrency limiter with `.add()` and `.drain()` |
 
+## Using Sharp in a Bundled App
+
+Sharp relies on native C++ addons (libvips) that can't be inlined into a JavaScript bundle. If your app uses `bun build` (or any bundler), tell it to leave Sharp alone:
+
+```bash
+bun build --entrypoints ./src/_.js --outdir ./dist --target bun --external sharp
+```
+
+The `--external sharp` flag keeps the `import` statement intact in the output. At runtime, Bun (and Node) resolve it through standard module lookup — walking up the directory tree from the executing file until it finds a `node_modules/sharp`:
+
+```
+your-project/
+  node_modules/       ← sharp lives here (from bun install)
+    sharp/
+  src/
+    _.js
+  dist/
+    _.js              ← bundled output runs here, finds sharp via ../node_modules/
+```
+
+**Deployment:** run `bun install` on the target machine so `node_modules/sharp` is present with the correct platform-specific binaries. That's it — no global installs, no special configuration.
+
+## Quick Inline Optimisation
+
+If you only need to optimise one image at a time (e.g. after a user upload), you don't need this package at all. Add `sharp` directly to your project and use it inline:
+
+```bash
+bun add sharp
+```
+
+```js
+import sharp from 'sharp';
+
+const buffer = await sharp( input_path )
+    .resize({ width: 1920, height: 1920, fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: 80, mozjpeg: true })
+    .toBuffer();
+
+await Bun.write( output_path, buffer );
+```
+
+Swap `.jpeg()` for `.png()`, `.webp()`, or `.gif()` depending on the format. See [Supported Formats](#supported-formats) for encoder options.
+
+If your app is bundled, remember to add `--external sharp` to your build command — see [Using Sharp in a Bundled App](#using-sharp-in-a-bundled-app).
+
 ## How Tracking Works
 
 On the first run, a SQLite database (`optim.db`) is created alongside the tool. Each processed image is recorded with its **file path**, **file size**, and **modification time**.
